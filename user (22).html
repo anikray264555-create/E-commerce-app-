@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Upkart - Online Shopping App</title>
+    <meta name="theme-color" content="#2874f0">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CORE CSS VARIABLES --- */
+        :root {
+            --primary-blue: #2874f0;
+            --primary-orange: #fb641b;
+            --secondary-green: #388e3c;
+            --secondary-red: #d32f2f;
+            --bg-color: #f1f3f6;
+            --white: #ffffff;
+            --text-dark: #212121;
+            --text-grey: #878787;
+            --border-color: #f0f0f0;
+            --header-height: 56px;
+            --bottom-nav-height: 60px;
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 0; font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color); color: var(--text-dark);
+            padding-bottom: var(--bottom-nav-height); overflow-x: hidden;
+        }
+        
+        /* --- UTILITIES --- */
+        .hide { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .j-between { justify-content: space-between; }
+        .a-center { align-items: center; }
+        .gap-10 { gap: 10px; } .gap-16 { gap: 16px; }
+        .p-16 { padding: 16px; } .mb-10 { margin-bottom: 10px; } .mt-10 { margin-top: 10px; }
+        .bg-white { background: var(--white); }
+        .text-blue { color: var(--primary-blue); }
+        .text-grey { color: var(--text-grey); }
+        .text-green { color: var(--secondary-green); }
+        .text-red { color: var(--secondary-red); }
+        .fw-bold { font-weight: 700; }
+        .w-100 { width: 100%; }
+        .text-center { text-align: center; }
+        .border-top { border-top: 1px solid #f0f0f0; }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--primary-blue); height: var(--header-height);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            display: flex; align-items: center; padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .app-logo { color: #fff; font-weight: 700; font-style: italic; font-size: 18px; margin-right: 10px; }
+        .app-logo span { color: #ffe500; }
+        .search-trigger { 
+            background: #fff; border-radius: 2px; padding: 8px 12px; flex: 1; 
+            display: flex; align-items: center; color: var(--text-grey); font-size: 14px; 
+        }
+        .header-right { display: flex; gap: 20px; color: #fff; margin-left: 15px; align-items: center; }
+        .cart-icon-wrapper { position: relative; }
+        .cart-badge {
+            position: absolute; top: -8px; right: -8px; background: var(--secondary-red);
+            color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; border: 1px solid var(--primary-blue);
+        }
+
+        /* --- MAIN LAYOUT --- */
+        #main-container { margin-top: var(--header-height); min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height)); }
+        
+        /* --- COMPONENTS --- */
+        .section-title { padding: 16px; background: #fff; font-size: 16px; font-weight: 600; border-bottom: 1px solid #f0f0f0; margin-top: 8px; }
+        .btn-primary { 
+            width: 100%; background: var(--primary-orange); color: #fff; 
+            padding: 12px; border: none; border-radius: 2px; font-weight: 600; font-size: 14px; cursor: pointer;
+        }
+        .btn-outline { background: #fff; border: 1px solid #ddd; color: #333; }
+        .btn-disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Product Grid */
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #f0f0f0; }
+        .product-card { background: #fff; padding: 12px; position: relative; display: flex; flex-direction: column; }
+        .pc-img { height: 140px; width: 100%; object-fit: contain; margin-bottom: 10px; transition: transform 0.2s; }
+        .pc-title { font-size: 13px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pc-price { font-size: 15px; font-weight: 600; }
+        .wishlist-btn { position: absolute; top: 8px; right: 8px; color: #c2c2c2; z-index: 2; font-size: 18px; }
+        .wishlist-btn.active { color: var(--secondary-red); }
+
+        /* Reviews Section */
+        .review-card { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; background: #fff; }
+        .star-rating { color: var(--secondary-green); font-size: 12px; background: #e8f5e9; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+        .review-form { background: #fff; padding: 16px; margin-top: 8px; }
+
+        /* Categories */
+        .category-scroll { display: flex; overflow-x: auto; background: #fff; padding: 12px 0; margin-bottom: 8px; }
+        .cat-item { min-width: 80px; display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 500; }
+        .cat-img-wrap { width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; margin-bottom: 5px; overflow: hidden; }
+        .cat-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Forms */
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-input, .form-select, textarea { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-family: inherit; }
+        
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; background: #fff; height: var(--bottom-nav-height);
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 -1px 4px rgba(0,0,0,0.1); z-index: 900;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-grey); gap: 4px; width: 20%; }
+        .nav-item i { font-size: 18px; margin-bottom: 2px;}
+        .nav-item.active { color: var(--primary-blue); }
+
+        /* Modals */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000;
+            display: flex; justify-content: flex-end; flex-direction: column;
+        }
+        .modal-content {
+            background: #fff; border-radius: 16px 16px 0 0; max-height: 85vh;
+            overflow-y: auto; padding: 20px; animation: slideUp 0.3s;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* Loader & Toast */
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95);
+            z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-blue);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: #333; color: #fff; padding: 12px 24px; border-radius: 30px;
+            font-size: 13px; z-index: 5000; opacity: 0; transition: 0.3s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+
+        /* Account */
+        .profile-header { padding: 16px; background: #fff; margin-bottom: 8px; display: flex; align-items: center; gap: 15px; }
+        .profile-img { width: 60px; height: 60px; border-radius: 50%; background: #e0e0e0; object-fit: cover; }
+        .menu-item { padding: 16px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <!-- SYSTEM UI -->
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <div class="mt-10 text-blue fw-bold">Upkart</div>
+    </div>
+    <div id="toast" class="toast">Notification</div>
+
+    <!-- HEADER -->
+    <header id="app-header">
+        <div class="flex a-center w-100">
+            <div class="app-logo" onclick="app.router.go('home')">Upkart<span>.</span></div>
+            <div class="search-trigger" onclick="app.router.go('search')">
+                <i class="fas fa-search" style="margin-right: 8px;"></i> Search...
+            </div>
+            <div class="header-right">
+                <div class="cart-icon-wrapper" onclick="app.router.go('cart')">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div id="header-cart-count" class="cart-badge hide">0</div>
+                </div>
+                <div onclick="app.router.go('login')" id="header-login-btn" style="font-size: 14px; font-weight: 500;">Login</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- VIEWS -->
+    <main id="main-container">
+        
+        <!-- HOME -->
+        <div id="view-home" class="view">
+            <div id="home-banners" class="flex" style="overflow-x:auto; background:#fff; padding-bottom:8px;">
+                <div class="p-16 text-grey w-100 text-center" style="height: 150px; display:flex; align-items:center; justify-content:center;">Loading Offers...</div>
+            </div>
+            <div id="home-categories" class="category-scroll"></div>
+            
+            <div class="section-title flex j-between">
+                <span>Trending Now</span>
+                <span class="text-blue" onclick="app.router.go('list', {sort: 'trending'})">View All</span>
+            </div>
+            <div id="home-trending" class="product-grid"></div>
+        </div>
+
+        <!-- PRODUCT LIST -->
+        <div id="view-list" class="view hide">
+            <div class="section-title"><span id="list-title">Products</span></div>
+            <div id="product-list-container" class="product-grid"></div>
+        </div>
+
+        <!-- PRODUCT DETAIL (UPDATED) -->
+        <div id="view-pdp" class="view hide" style="background:#f1f3f6; padding-bottom:60px;">
+            <div id="pdp-content" class="bg-white"></div>
+            
+            <!-- Reviews Section -->
+            <div class="section-title mt-10">Ratings & Reviews</div>
+            <div id="pdp-reviews-list"></div>
+            <div class="bg-white p-16 border-top">
+                <button class="btn-primary btn-outline" onclick="app.ui.openReviewModal()">Write a Review</button>
+            </div>
+
+            <!-- Related Products -->
+            <div class="section-title mt-10">Similar Products</div>
+            <div id="pdp-related" class="product-grid"></div>
+
+            <div style="position: fixed; bottom: 0; left: 0; right: 0; height: 50px; display: flex; z-index: 1000;">
+                <button onclick="app.cart.addCurrent()" style="flex:1; background:#fff; color:#000; border:1px solid #e0e0e0; font-weight:600">ADD TO CART</button>
+                <button onclick="app.cart.buyNow()" style="flex:1; background:var(--primary-orange); color:#fff; border:none; font-weight:600">BUY NOW</button>
+            </div>
+        </div>
+
+        <!-- CART -->
+        <div id="view-cart" class="view hide">
+            <div id="cart-items-container"></div>
+            <div id="cart-price-container"></div>
+            <div class="p-16 bg-white" style="position: sticky; bottom: 60px; box-shadow: 0 -2px 4px rgba(0,0,0,0.1);">
+                <button class="btn-primary" onclick="app.router.go('checkout')">Place Order</button>
+            </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div id="view-account" class="view hide">
+            <div class="profile-header">
+                <img id="profile-img-display" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-img">
+                <div style="flex:1">
+                    <div id="profile-name" class="fw-bold" style="font-size:16px;">Guest</div>
+                    <div id="profile-email" class="text-grey" style="font-size:12px;">Login to view profile</div>
+                </div>
+                <div class="text-blue fw-bold" style="font-size:14px" onclick="app.ui.openEditProfileModal()">Edit</div>
+            </div>
+
+            <div class="bg-white mb-10">
+                <div class="menu-item" onclick="app.router.go('orders')">
+                    <div class="flex a-center gap-16"><i class="fas fa-box text-blue"></i> My Orders</div>
+                    <i class="fas fa-chevron-right text-grey"></i>
+                </div>
+                <div class="menu-item" onclick="app.router.go('wishlist')">
+                    <div class="flex a-center gap-16"><i class="fas fa-heart text-blue"></i> My Wishlist</div>
+                    <i class="fas fa-chevron-right text-grey"></i>
+                </div>
+                <div class="menu-item" onclick="app.ui.openAddressModal()">
+                    <div class="flex a-center gap-16"><i class="fas fa-map-marker-alt text-blue"></i> Saved Addresses</div>
+                    <i class="fas fa-chevron-right text-grey"></i>
+                </div>
+            </div>
+
+            <div class="section-title">Settings</div>
+            <div class="bg-white mb-10">
+                <div class="menu-item" onclick="app.ui.openChangePasswordModal()">
+                    <div class="flex a-center gap-16"><i class="fas fa-key text-grey"></i> Change Password</div>
+                </div>
+                <div class="menu-item" onclick="app.ui.showInfo('Help', 'Contact: support@upkart.com')">
+                    <div class="flex a-center gap-16"><i class="fas fa-headset text-grey"></i> Help Center</div>
+                </div>
+                <div class="menu-item" onclick="app.auth.logout()">
+                    <div class="flex a-center gap-16 text-red"><i class="fas fa-sign-out-alt"></i> Log Out</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTH -->
+        <div id="view-login" class="view hide p-16 bg-white" style="min-height:100vh; margin-top:-56px; padding-top:80px;">
+            <h2 class="text-center text-blue">Welcome Back</h2>
+            <div class="form-group"><input type="email" id="login-email" class="form-input" placeholder="Email Address"></div>
+            <div class="form-group"><input type="password" id="login-pass" class="form-input" placeholder="Password"></div>
+            <button class="btn-primary" onclick="app.auth.login()">Login</button>
+            <p class="text-center mt-10">New here? <span class="text-blue fw-bold" onclick="app.router.go('register')">Register</span></p>
+        </div>
+
+        <div id="view-register" class="view hide p-16 bg-white" style="min-height:100vh; margin-top:-56px; padding-top:80px;">
+            <h2 class="text-center text-blue">Create Account</h2>
+            <div class="form-group"><input type="text" id="reg-name" class="form-input" placeholder="Full Name"></div>
+            <div class="form-group"><input type="email" id="reg-email" class="form-input" placeholder="Email Address"></div>
+            <div class="form-group"><input type="password" id="reg-pass" class="form-input" placeholder="Set Password"></div>
+            <button class="btn-primary" onclick="app.auth.register()">Register</button>
+            <p class="text-center mt-10">Existing User? <span class="text-blue fw-bold" onclick="app.router.go('login')">Login</span></p>
+        </div>
+
+        <!-- SEARCH -->
+        <div id="view-search" class="view hide bg-white" style="position:fixed;top:0;bottom:0;left:0;right:0;z-index:1100;">
+            <div class="flex a-center p-16 border-bottom" style="box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <i class="fas fa-arrow-left" onclick="history.back()" style="font-size: 18px; padding: 5px;"></i>
+                <input type="text" id="search-input" class="form-input" style="border:none; margin-left:10px; flex:1; background:#f0f0f0" placeholder="Search for products..." autofocus>
+                <i class="fas fa-search text-blue" style="margin-left: 10px;" onclick="app.search.execute()"></i>
+            </div>
+            <div id="search-results" class="p-16 product-grid" style="background: #fff;"></div>
+        </div>
+
+        <!-- WISHLIST -->
+        <div id="view-wishlist" class="view hide">
+             <div class="section-title">My Wishlist</div>
+             <div id="wishlist-container" class="product-grid"></div>
+        </div>
+        
+        <!-- ORDERS -->
+        <div id="view-orders" class="view hide">
+            <div class="section-title">My Orders</div>
+            <div id="orders-list-container"></div>
+        </div>
+
+        <!-- CHECKOUT (UPDATED) -->
+        <div id="view-checkout" class="view hide">
+            <div class="section-title">1. Delivery Address</div>
+            <div id="checkout-addresses"></div>
+            <div class="p-16 bg-white text-blue fw-bold" onclick="app.ui.openAddressModal()">+ Add New Address</div>
+            
+            <div class="section-title mt-10">2. Coupons</div>
+            <div class="bg-white p-16 flex gap-10">
+                <input type="text" id="coupon-code" class="form-input" placeholder="Enter Coupon Code" style="text-transform:uppercase; margin:0">
+                <button class="btn-primary" style="width:auto; padding:0 20px;" onclick="app.order.applyCoupon()">Apply</button>
+            </div>
+
+            <div class="section-title mt-10">3. Bill Details</div>
+            <div id="checkout-summary" class="p-16 bg-white"></div>
+            
+            <div class="section-title mt-10">4. Payment</div>
+            <div class="bg-white p-16">
+                <div class="mb-10 flex a-center gap-10"><i class="fas fa-qrcode text-blue"></i> <b>UPI / QR Pay</b></div>
+                <div style="background:#f9f9f9; padding:15px; text-align:center; border: 1px dashed #ccc; border-radius:4px;">
+                    <div id="upi-qr"></div>
+                    <p class="fw-bold mt-10" style="font-size:18px">Pay: <span id="pay-amount"></span></p>
+                    <p id="admin-upi-id" class="text-grey" style="font-size:12px; user-select: text;">Loading UPI...</p>
+                    
+                    <div class="mt-10" style="text-align:left">
+                        <label class="fw-bold" style="font-size:12px">Transaction ID (Required)</label>
+                        <input type="text" id="txn-id" class="form-input" placeholder="e.g. 1234567890">
+                    </div>
+                </div>
+                <button id="confirm-order-btn" class="btn-primary mt-10" onclick="app.order.place()">Confirm Order</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODALS -->
+    <div id="modal-address" class="modal hide">
+        <div class="modal-content">
+            <h3>Add Address</h3>
+            <div class="form-group"><input type="text" id="addr-name" class="form-input" placeholder="Full Name"></div>
+            <div class="form-group"><input type="number" id="addr-mobile" class="form-input" placeholder="Mobile Number"></div>
+            <div class="form-group"><input type="number" id="addr-pin" class="form-input" placeholder="Pincode"></div>
+            <div class="form-group"><input type="text" id="addr-line1" class="form-input" placeholder="House No, Building, Street"></div>
+            <div class="form-group"><input type="text" id="addr-city" class="form-input" placeholder="City, State"></div>
+            <button class="btn-primary" onclick="app.user.saveAddress()">Save Address</button>
+            <button class="btn-primary btn-outline mt-10" onclick="app.ui.closeModal('modal-address')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="modal-profile" class="modal hide">
+        <div class="modal-content">
+            <h3>Edit Profile</h3>
+            <div class="form-group"><label>Name</label><input type="text" id="edit-name" class="form-input"></div>
+            <div class="form-group"><label>Phone</label><input type="text" id="edit-phone" class="form-input"></div>
+            <div class="form-group"><label>Photo URL</label><input type="text" id="edit-photo" class="form-input" placeholder="https://..."></div>
+            <button class="btn-primary" onclick="app.user.updateProfile()">Update</button>
+            <button class="btn-primary btn-outline mt-10" onclick="app.ui.closeModal('modal-profile')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="modal-review" class="modal hide">
+        <div class="modal-content">
+            <h3>Write a Review</h3>
+            <div class="form-group">
+                <label>Rating (1-5)</label>
+                <select id="rev-rating" class="form-select">
+                    <option value="5">5 ★ Excellent</option>
+                    <option value="4">4 ★ Very Good</option>
+                    <option value="3">3 ★ Good</option>
+                    <option value="2">2 ★ Poor</option>
+                    <option value="1">1 ★ Very Poor</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Comment</label>
+                <textarea id="rev-comment" rows="3" placeholder="Describe your experience..."></textarea>
+            </div>
+            <button class="btn-primary" onclick="app.product.submitReview()">Submit Review</button>
+            <button class="btn-primary btn-outline mt-10" onclick="app.ui.closeModal('modal-review')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="modal-password" class="modal hide">
+        <div class="modal-content">
+            <h3>Change Password</h3>
+            <div class="form-group"><input type="password" id="new-pass" class="form-input" placeholder="New Password"></div>
+            <div class="form-group"><input type="password" id="confirm-pass" class="form-input" placeholder="Confirm Password"></div>
+            <button class="btn-primary" onclick="app.auth.changePassword()">Change</button>
+            <button class="btn-primary btn-outline mt-10" onclick="app.ui.closeModal('modal-password')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <div class="nav-item" data-target="home" onclick="app.router.go('home')">
+            <i class="fas fa-home"></i><span>Home</span>
+        </div>
+        <div class="nav-item" data-target="list" onclick="app.router.go('list')">
+            <i class="fas fa-th-large"></i><span>Categories</span>
+        </div>
+        <div class="nav-item" data-target="wishlist" onclick="app.router.go('wishlist')">
+            <i class="fas fa-heart"></i><span>Wishlist</span>
+        </div>
+        <div class="nav-item" data-target="account" onclick="app.router.go('account')">
+            <i class="fas fa-user"></i><span>Account</span>
+        </div>
+        <div class="nav-item" data-target="cart" onclick="app.router.go('cart')">
+            <i class="fas fa-shopping-cart"></i><span>Cart</span>
+        </div>
+    </nav>
+
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ==========================================
+        // 1. CONFIGURATION
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGcbOMXTnbVmF56Jn9YU5ai3NFhuCzwdo",
+            authDomain: "flipkart-f7ab0.firebaseapp.com",
+            projectId: "flipkart-f7ab0",
+            storageBucket: "flipkart-f7ab0.firebasestorage.app",
+            messagingSenderId: "94028893580",
+            appId: "1:94028893580:web:1bae1834c73027d7601aa9",
+            measurementId: "G-6ZHEF390TD"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ==========================================
+        // 2. APP LOGIC
+        // ==========================================
+        const app = {
+            state: {
+                user: null, cart: [], wishlist: [], products: [], 
+                profile: null, address: [], 
+                settings: { upiId: 'admin@upi', qrCode: '', currency: '₹' },
+                currentCoupon: null
+            },
+
+            init: async () => {
+                app.ui.toggleLoader(true);
+                
+                // Fast Load: Start Router immediately
+                app.router.init();
+
+                // Load Core Data in Parallel for Speed
+                const p1 = new Promise(resolve => auth.onAuthStateChanged(async (user) => {
+                    app.state.user = user;
+                    app.ui.updateHeader();
+                    if (user) await app.user.fetchData();
+                    else {
+                        app.state.cart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+                        app.ui.updateCartCount();
+                    }
+                    resolve();
+                }));
+
+                const p2 = app.data.fetchSettings(); // Settings
+                const p3 = app.data.fetchBanners();  // Banners
+                const p4 = app.data.fetchCategories(); // Cats
+                
+                await Promise.all([p1, p2, p3, p4]);
+                
+                // Load products last (background)
+                app.data.fetchProducts();
+                
+                app.ui.toggleLoader(false);
+            },
+
+            router: {
+                init: () => {
+                    window.addEventListener('popstate', (e) => {
+                        if(e.state && e.state.page) app.router.render(e.state.page, e.state.params);
+                        else app.router.render('home');
+                    });
+                    const initialPage = location.hash.replace('#','') || 'home';
+                    app.router.render(initialPage);
+                },
+                go: (page, params = {}) => {
+                    history.pushState({ page, params }, '', `#${page}`);
+                    app.router.render(page, params);
+                },
+                render: (page, params) => {
+                    document.querySelectorAll('.view').forEach(el => el.classList.add('hide'));
+                    window.scrollTo(0, 0);
+
+                    const header = document.getElementById('app-header');
+                    const bNav = document.querySelector('.bottom-nav');
+                    const noHeaderPages = ['login', 'register', 'search'];
+                    
+                    if(noHeaderPages.includes(page)) {
+                        header.classList.add('hide');
+                        bNav.classList.add('hide');
+                    } else if (page === 'checkout' || page === 'pdp') {
+                         header.classList.remove('hide');
+                         bNav.classList.add('hide');
+                    } else {
+                         header.classList.remove('hide');
+                         bNav.classList.remove('hide');
+                    }
+
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    const navTarget = document.querySelector(`.nav-item[data-target="${page}"]`);
+                    if(navTarget) navTarget.classList.add('active');
+
+                    switch(page) {
+                        case 'home': document.getElementById('view-home').classList.remove('hide'); break;
+                        case 'list': app.product.renderList(params); document.getElementById('view-list').classList.remove('hide'); break;
+                        case 'pdp': app.product.renderDetail(params.id); document.getElementById('view-pdp').classList.remove('hide'); break;
+                        case 'cart': app.cart.render(); document.getElementById('view-cart').classList.remove('hide'); break;
+                        case 'account':
+                            if(!app.state.user) return app.router.go('login');
+                            app.user.renderProfile();
+                            document.getElementById('view-account').classList.remove('hide'); break;
+                        case 'login': document.getElementById('view-login').classList.remove('hide'); break;
+                        case 'register': document.getElementById('view-register').classList.remove('hide'); break;
+                        case 'search': document.getElementById('view-search').classList.remove('hide'); break;
+                        case 'orders': app.order.renderList(); document.getElementById('view-orders').classList.remove('hide'); break;
+                        case 'wishlist': app.product.renderWishlist(); document.getElementById('view-wishlist').classList.remove('hide'); break;
+                        case 'checkout':
+                            if(!app.state.user) return app.router.go('login');
+                            app.order.renderCheckout();
+                            document.getElementById('view-checkout').classList.remove('hide'); break;
+                        default: document.getElementById('view-home').classList.remove('hide');
+                    }
+                }
+            },
+
+            data: {
+                fetchSettings: async () => {
+                    try {
+                        const snap = await db.collection('settings').doc('config').get();
+                        if(snap.exists) app.state.settings = { ...app.state.settings, ...snap.data() };
+                    } catch(e) {}
+                },
+                fetchBanners: async () => {
+                    const c = document.getElementById('home-banners');
+                    try {
+                        const snap = await db.collection('banners').orderBy('order').get();
+                        if(snap.empty) throw new Error();
+                        c.innerHTML = '';
+                        snap.forEach(doc => {
+                            // ইমেজ স্টাইল আপডেট করা হয়েছে
+                            c.innerHTML += `<img src="${doc.data().image}" style="min-width:94%; margin: 10px 3%; height:160px; object-fit:cover; scroll-snap-align:start; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">`;
+                         })
+                        // --- ৩ সেকেন্ড পর পর অটো স্লাইড ---
+                        setInterval(() => {
+                            if (c.scrollLeft + c.clientWidth >= c.scrollWidth - 10) {
+                                c.scrollTo({ left: 0, behavior: 'smooth' }); // শেষে গেলে শুরুতে আসবে
+                            } else {
+                                c.scrollBy({ left: c.clientWidth, behavior: 'smooth' }); // ডানে যাবে
+                            }
+                        }, 3000);
+
+                    } catch(e) { 
+                        c.innerHTML = '<div class="p-16 w-100 text-center text-grey">No Offers Currently</div>'; 
+                    }
+                },
+                fetchCategories: async () => {
+                    const c = document.getElementById('home-categories');
+                    try {
+                        const snap = await db.collection('categories').orderBy('order').get();
+                        c.innerHTML = '';
+                        snap.forEach(doc => {
+                            const d = doc.data();
+                            // Only show main categories (no parentId)
+                            if(!d.parentId) {
+                                c.innerHTML += `<div class="cat-item" onclick="app.router.go('list',{cat:'${d.name}'})"><div class="cat-img-wrap"><img src="${d.image}" onerror="this.src='https://via.placeholder.com/50'"></div><span>${d.name}</span></div>`;
+                            }
+                        });
+                    } catch(e) {}
+                },
+                fetchProducts: async () => {
+                    try {
+                        const snap = await db.collection('products').limit(20).get();
+                        app.state.products = [];
+                        snap.forEach(doc => app.state.products.push({id: doc.id, ...doc.data()}));
+                        app.product.renderGrid(app.state.products, 'home-trending');
+                    } catch(e) { document.getElementById('home-trending').innerHTML = ''; }
+                }
+            },
+
+            user: {
+                fetchData: async () => {
+                    const uid = app.state.user.uid;
+                    try {
+                        const [pSnap, cSnap, wSnap, aSnap] = await Promise.all([
+                            db.collection('users').doc(uid).get(),
+                            db.collection('users').doc(uid).collection('cart').get(),
+                            db.collection('users').doc(uid).collection('wishlist').get(),
+                            db.collection('users').doc(uid).collection('addresses').get()
+                        ]);
+
+                        app.state.profile = pSnap.exists ? pSnap.data() : { name: 'User', email: app.state.user.email };
+                        app.state.cart = []; cSnap.forEach(d => app.state.cart.push(d.data()));
+                        app.state.wishlist = []; wSnap.forEach(d => app.state.wishlist.push(d.id));
+                        app.state.address = []; aSnap.forEach(d => app.state.address.push({id: d.id, ...d.data()}));
+                        
+                        app.ui.updateCartCount();
+                    } catch(e) { console.log(e); }
+                },
+                renderProfile: () => {
+                    document.getElementById('profile-name').innerText = app.state.profile.name || "User";
+                    document.getElementById('profile-email').innerText = app.state.profile.email || app.state.user.email;
+                    if(app.state.profile.photo) document.getElementById('profile-img-display').src = app.state.profile.photo;
+                },
+                updateProfile: async () => {
+                    const name = document.getElementById('edit-name').value;
+                    const phone = document.getElementById('edit-phone').value;
+                    const photo = document.getElementById('edit-photo').value;
+                    app.ui.toggleLoader(true);
+                    await db.collection('users').doc(app.state.user.uid).set({ name, phone, photo, email: app.state.user.email }, { merge: true });
+                    await app.user.fetchData();
+                    app.user.renderProfile();
+                    app.ui.closeModal('modal-profile');
+                    app.ui.toggleLoader(false);
+                },
+                saveAddress: async () => {
+                    const addr = {
+                        name: document.getElementById('addr-name').value,
+                        mobile: document.getElementById('addr-mobile').value,
+                        pin: document.getElementById('addr-pin').value,
+                        line1: document.getElementById('addr-line1').value,
+                        city: document.getElementById('addr-city').value
+                    };
+                    if(!addr.name || !addr.mobile) return app.ui.toast("Name & Mobile required");
+                    app.ui.toggleLoader(true);
+                    await db.collection('users').doc(app.state.user.uid).collection('addresses').add(addr);
+                    await app.user.fetchData();
+                    if(!document.getElementById('view-checkout').classList.contains('hide')) app.order.renderCheckout();
+                    app.ui.closeModal('modal-address');
+                    app.ui.toggleLoader(false);
+                }
+            },
+
+            auth: {
+                login: async () => {
+                    const e = document.getElementById('login-email').value;
+                    const p = document.getElementById('login-pass').value;
+                    if(!e || !p) return app.ui.toast("Fill all fields");
+                    app.ui.toggleLoader(true);
+                    try {
+                        await auth.signInWithEmailAndPassword(e, p);
+                        app.router.go('home');
+                    } catch(err) { app.ui.toast(err.message); }
+                    app.ui.toggleLoader(false);
+                },
+                register: async () => {
+                    const n = document.getElementById('reg-name').value;
+                    const e = document.getElementById('reg-email').value;
+                    const p = document.getElementById('reg-pass').value;
+                    if(!e || !p) return app.ui.toast("Fill all fields");
+                    app.ui.toggleLoader(true);
+                    try {
+                        const cred = await auth.createUserWithEmailAndPassword(e, p);
+                        await db.collection('users').doc(cred.user.uid).set({name: n, email: e, createdAt: new Date()});
+                        app.router.go('home');
+                    } catch(err) { app.ui.toast(err.message); }
+                    app.ui.toggleLoader(false);
+                },
+                logout: () => { auth.signOut(); app.state.user = null; app.state.cart = []; app.router.go('login'); },
+                changePassword: async () => {
+                    const n = document.getElementById('new-pass').value;
+                    try { await auth.currentUser.updatePassword(n); app.ui.toast("Password Changed"); app.ui.closeModal('modal-password'); } 
+                    catch(e) { app.ui.toast("Re-login required"); }
+                }
+            },
+
+            product: {
+                renderGrid: (list, containerId) => {
+                    const c = document.getElementById(containerId);
+                    if(!list.length) { c.innerHTML = '<div class="p-16 text-grey w-100 text-center">No products found</div>'; return; }
+                    c.innerHTML = '';
+                    list.forEach(p => {
+                        // Safe Math for Discount (Fixing NaN issue)
+                        const price = parseFloat(p.price) || 0;
+                        const original = parseFloat(p.originalPrice) || (price * 1.2); // Fake original if missing
+                        const off = Math.round(((original - price)/original)*100);
+                        
+                        c.innerHTML += `
+                        <div class="product-card" onclick="app.router.go('pdp', {id: '${p.id}'})">
+                            <i class="fas fa-heart wishlist-btn ${app.state.wishlist.includes(p.id) ? 'active':''}" onclick="event.stopPropagation();app.product.toggleWishlist('${p.id}')"></i>
+                            <img src="${p.images ? p.images[0] : ''}" class="pc-img">
+                            <div class="pc-title">${p.name}</div>
+                            <div class="pc-price">₹${price} <span class="text-grey" style="font-size:12px;text-decoration:line-through;font-weight:400">₹${original}</span> <span class="text-green" style="font-size:11px">${off}% off</span></div>
+                        </div>`;
+                    });
+                },
+                renderList: async (params) => {
+                    document.getElementById('list-title').innerText = params.cat || 'All Products';
+                    app.ui.toggleLoader(true);
+                    let q = db.collection('products');
+                    if(params.cat) q = q.where('category', '==', params.cat);
+                    const s = await q.get();
+                    const l = s.docs.map(d => ({id:d.id, ...d.data()}));
+                    app.product.renderGrid(l, 'product-list-container');
+                    app.ui.toggleLoader(false);
+                },
+                renderDetail: async (id) => {
+                    app.ui.toggleLoader(true);
+                    const d = await db.collection('products').doc(id).get();
+                    if(!d.exists) { app.ui.toggleLoader(false); return app.ui.toast("Product not found"); }
+                    
+                    const p = d.data();
+                    app.state.currentProduct = {id, ...p};
+                    
+                    // Price Calculations
+                    const price = parseFloat(p.price) || 0;
+                    const original = parseFloat(p.originalPrice) || (price * 1.2); 
+                    const off = Math.round(((original - price)/original)*100);
+                    
+                    // 1. Render Basic Info
+                    document.getElementById('pdp-content').innerHTML = `
+                        <div style="height:300px;display:flex;justify-content:center;align-items:center;background:#fff"><img src="${p.images ? p.images[0] : ''}" style="height:100%;max-width:100%"></div>
+                        <div class="p-16">
+                            <div class="text-grey" style="font-size:12px">${p.brand || 'Generic'}</div>
+                            <div style="font-size:16px;margin:5px 0;line-height:1.4">${p.name}</div>
+                            <div style="font-size:24px;font-weight:600">₹${price} <span class="text-grey" style="font-size:14px;text-decoration:line-through">₹${original}</span> <span class="text-green" style="font-size:14px">${off}% off</span></div>
+                            
+                            <!-- Specs (if any) -->
+                            ${p.specs ? `<div class="mt-10 bg-white" style="font-size:13px">
+                                ${Object.entries(p.specs).map(([k,v]) => `<div class="flex j-between" style="padding:4px 0;border-bottom:1px dashed #eee"><span class="text-grey">${k}</span><span>${v}</span></div>`).join('')}
+                            </div>` : ''}
+                            
+                            <div class="mt-10" style="font-size:14px;color:#555;line-height:1.5">${p.description}</div>
+                        </div>`;
+
+                    // 2. Render Reviews
+                    const rSnap = await db.collection('reviews').where('productId', '==', id).where('approved', '==', true).limit(5).get();
+                    const rCont = document.getElementById('pdp-reviews-list');
+                    if(rSnap.empty) rCont.innerHTML = '<div class="p-16 text-grey bg-white">No reviews yet. Be the first!</div>';
+                    else {
+                        rCont.innerHTML = '';
+                        rSnap.forEach(doc => {
+                            const r = doc.data();
+                            rCont.innerHTML += `
+                                <div class="review-card">
+                                    <div class="flex a-center gap-10">
+                                        <span class="star-rating">${r.rating} ★</span>
+                                        <span class="fw-bold" style="font-size:13px">${r.userName}</span>
+                                    </div>
+                                    <div class="mt-10 text-grey" style="font-size:13px">${r.comment}</div>
+                                </div>`;
+                        });
+                    }
+
+                    // 3. Render Related Products (Same Category)
+                    const relatedSnap = await db.collection('products').where('category', '==', p.category).limit(5).get();
+                    const relatedList = [];
+                    relatedSnap.forEach(rd => { if(rd.id !== id) relatedList.push({id:rd.id, ...rd.data()}); });
+                    app.product.renderGrid(relatedList, 'pdp-related');
+
+                    app.ui.toggleLoader(false);
+                },
+                submitReview: async () => {
+                    if(!app.state.user) return app.router.go('login');
+                    const rating = document.getElementById('rev-rating').value;
+                    const comment = document.getElementById('rev-comment').value;
+                    const p = app.state.currentProduct;
+                    
+                    await db.collection('reviews').add({
+                        productId: p.id, productName: p.name,
+                        userId: app.state.user.uid, userName: app.state.profile.name,
+                        rating: parseInt(rating), comment,
+                        date: new Date().toISOString(), approved: false
+                    });
+                    app.ui.toast("Review Submitted for Approval");
+                    app.ui.closeModal('modal-review');
+                },
+                toggleWishlist: async (pid) => {
+                    if(!app.state.user) return app.router.go('login');
+                    const ref = db.collection('users').doc(app.state.user.uid).collection('wishlist').doc(pid);
+                    if(app.state.wishlist.includes(pid)) { await ref.delete(); app.ui.toast("Removed"); } 
+                    else { await ref.set({addedAt: new Date()}); app.ui.toast("Saved"); }
+                    app.user.fetchData();
+                },
+                renderWishlist: async () => {
+                    app.ui.toggleLoader(true);
+                    const list = [];
+                    for(let id of app.state.wishlist) {
+                        const d = await db.collection('products').doc(id).get();
+                        if(d.exists) list.push({id, ...d.data()});
+                    }
+                    app.product.renderGrid(list, 'wishlist-container');
+                    app.ui.toggleLoader(false);
+                }
+            },
+
+            cart: {
+                addCurrent: async () => {
+                    const p = app.state.currentProduct;
+                    // Guest Logic
+                    if(!app.state.user) {
+                        const ex = app.state.cart.find(i => i.id === p.id);
+                        if(ex) ex.qty++; else app.state.cart.push({id:p.id, qty:1, price:p.price, name:p.name, img:p.images[0]});
+                        localStorage.setItem('guest_cart', JSON.stringify(app.state.cart));
+                        app.ui.updateCartCount();
+                        app.ui.toast("Added to Cart");
+                        return;
+                    }
+                    // Auth Logic
+                    await db.collection('users').doc(app.state.user.uid).collection('cart').doc(p.id).set({
+                        id:p.id, qty: firebase.firestore.FieldValue.increment(1), price:p.price, name:p.name, img:p.images[0]
+                    }, {merge:true});
+                    app.ui.toast("Added to Cart");
+                    app.user.fetchData();
+                },
+                buyNow: async () => { await app.cart.addCurrent(); app.router.go('cart'); },
+                render: () => {
+                    const c = document.getElementById('cart-items-container');
+                    const pc = document.getElementById('cart-price-container');
+                    if(!app.state.cart.length) { c.innerHTML = '<div class="p-16 text-center">Cart is empty</div>'; pc.innerHTML = ''; return; }
+                    
+                    let total = 0;
+                    c.innerHTML = '';
+                    app.state.cart.forEach(i => {
+                        total += (parseFloat(i.price)||0) * i.qty;
+                        c.innerHTML += `
+                        <div class="bg-white p-16 mb-10 flex gap-16">
+                            <img src="${i.img}" style="width:60px;height:60px;object-fit:contain">
+                            <div style="flex:1">
+                                <div class="fw-bold">${i.name}</div>
+                                <div>₹${i.price}</div>
+                                <div class="mt-10 border p-16" style="display:inline-block;padding:4px 10px; border:1px solid #eee">Qty: ${i.qty}</div>
+                            </div>
+                        </div>`;
+                    });
+                    pc.innerHTML = `<div class="p-16 bg-white mt-10"><div class="flex j-between fw-bold"><span>Total Amount</span><span>₹${total}</span></div></div>`;
+                }
+            },
+
+            order: {
+                renderCheckout: () => {
+                    app.state.currentCoupon = null; // Reset coupon
+                    
+                    // Address
+                    const ac = document.getElementById('checkout-addresses');
+                    if(!app.state.address.length) ac.innerHTML = '<div class="p-16 text-red">Please Add Address</div>';
+                    else {
+                        ac.innerHTML = '';
+                        app.state.address.forEach((a, i) => {
+                            ac.innerHTML += `<div class="p-16 bg-white mb-10" style="border-left:4px solid ${i===0?'var(--primary-blue)':'transparent'}"><b>${a.name}</b>, ${a.mobile}<br>${a.line1}, ${a.city} - ${a.pin}</div>`;
+                        });
+                    }
+                    app.order.updateSummary();
+                    
+                    // UPI Data from Admin
+                    document.getElementById('admin-upi-id').innerText = app.state.settings.upiId || 'Contact Admin';
+                    if(app.state.settings.qrCode) {
+                         document.getElementById('upi-qr').innerHTML = `<img src="${app.state.settings.qrCode}" style="width:150px;height:150px;">`;
+                    }
+                },
+                applyCoupon: async () => {
+                    const code = document.getElementById('coupon-code').value.toUpperCase();
+                    if(!code) return app.ui.toast("Enter Code");
+                    
+                    app.ui.toggleLoader(true);
+                    const snap = await db.collection('coupons').where('code', '==', code).get();
+                    if(snap.empty) { app.ui.toggleLoader(false); return app.ui.toast("Invalid Coupon"); }
+                    
+                    const c = snap.docs[0].data();
+                    const total = app.state.cart.reduce((s,i)=>s+((parseFloat(i.price)||0)*i.qty),0);
+                    
+                    if(total < c.minOrder) { app.ui.toggleLoader(false); return app.ui.toast(`Min Order ₹${c.minOrder} Required`); }
+                    
+                    app.state.currentCoupon = c;
+                    app.order.updateSummary();
+                    app.ui.toast("Coupon Applied!");
+                    app.ui.toggleLoader(false);
+                },
+                updateSummary: () => {
+                    let total = app.state.cart.reduce((s,i)=>s+((parseFloat(i.price)||0)*i.qty),0);
+                    let discount = 0;
+                    
+                    if(app.state.currentCoupon) {
+                        if(app.state.currentCoupon.type === 'percent') discount = (total * app.state.currentCoupon.value) / 100;
+                        else discount = app.state.currentCoupon.value;
+                    }
+                    
+                    const final = total - discount;
+                    document.getElementById('checkout-summary').innerHTML = `
+                        <div class="flex j-between mb-10"><span>Subtotal</span><span>₹${total}</span></div>
+                        <div class="flex j-between mb-10 text-green"><span>Discount</span><span>- ₹${discount}</span></div>
+                        <div class="flex j-between fw-bold border-top" style="padding-top:10px"><span>To Pay</span><span>₹${final}</span></div>
+                    `;
+                    document.getElementById('pay-amount').innerText = `₹${final}`;
+                },
+                place: async () => {
+                    const txn = document.getElementById('txn-id').value;
+                    if(!txn) return app.ui.toast("Enter Transaction ID");
+                    if(!app.state.address.length) return app.ui.toast("Add Address");
+                    
+                    app.ui.toggleLoader(true);
+                    try {
+                        // Re-calculate total to be safe
+                        let total = app.state.cart.reduce((s,i)=>s+((parseFloat(i.price)||0)*i.qty),0);
+                        let discount = 0;
+                        if(app.state.currentCoupon) {
+                             if(app.state.currentCoupon.type === 'percent') discount = (total * app.state.currentCoupon.value) / 100;
+                             else discount = app.state.currentCoupon.value;
+                        }
+                        const finalAmount = total - discount;
+
+                        await db.collection('orders').add({
+                            userId: app.state.user.uid, 
+                            customerName: app.state.address[0].name,
+                            phone: app.state.address[0].mobile,
+                            address: `${app.state.address[0].line1}, ${app.state.address[0].city} - ${app.state.address[0].pin}`,
+                            items: app.state.cart, 
+                            totalAmount: finalAmount,
+                            discount: discount,
+                            coupon: app.state.currentCoupon ? app.state.currentCoupon.code : null,
+                            paymentMethod: 'Manual',
+                            transactionId: txn,
+                            status: 'Pending',
+                            paymentStatus: 'Pending Verification', 
+                            date: new Date().toISOString()
+                        });
+
+                        // Clear cart
+                        const batch = db.batch();
+                        const s = await db.collection('users').doc(app.state.user.uid).collection('cart').get();
+                        s.docs.forEach(d => batch.delete(d.ref));
+                        await batch.commit();
+                        
+                        app.ui.toast("Order Placed Successfully!");
+                        app.router.go('orders');
+                    } catch(e) { app.ui.toast("Order Failed: " + e.message); }
+                    app.ui.toggleLoader(false);
+                },
+                renderList: async () => {
+                    const c = document.getElementById('orders-list-container');
+                    app.ui.toggleLoader(true);
+                    const s = await db.collection('orders').where('userId','==',app.state.user.uid).orderBy('date','desc').get();
+                    c.innerHTML = s.empty ? '<div class="p-16 text-center bg-white">No orders found</div>' : '';
+                    s.forEach(d => {
+                        const o = d.data();
+                        const date = new Date(o.date).toLocaleDateString();
+                        c.innerHTML += `
+                        <div class="bg-white p-16 mb-10">
+                            <div class="flex j-between">
+                                <div>
+                                    <span class="fw-bold text-blue">Order #${d.id.substr(0,6)}</span>
+                                    <div class="text-grey" style="font-size:12px">${date}</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="fw-bold">₹${o.totalAmount}</span>
+                                    <div class="text-green" style="font-size:12px">${o.status}</div>
+                                </div>
+                            </div>
+                            <div class="mt-10 pt-10 border-top text-grey" style="font-size:12px">
+                                ${o.items.map(i => i.name).join(', ')}
+                            </div>
+                        </div>`;
+                    });
+                    app.ui.toggleLoader(false);
+                }
+            },
+
+            search: {
+                execute: async () => {
+                    const q = document.getElementById('search-input').value.toLowerCase();
+                    if(q.length < 2) return;
+                    app.ui.toggleLoader(true);
+                    // Client side search for simplicity
+                    const s = await db.collection('products').get();
+                    const res = [];
+                    s.forEach(d => {
+                        const p = d.data();
+                        if(p.name.toLowerCase().includes(q)) res.push({id:d.id, ...p});
+                    });
+                    app.product.renderGrid(res, 'search-results');
+                    app.ui.toggleLoader(false);
+                }
+            },
+
+            ui: {
+                toggleLoader: show => document.getElementById('loader').classList.toggle('hide', !show),
+                toast: msg => { const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); },
+                updateHeader: () => { document.getElementById('header-login-btn').innerText = app.state.user ? 'More' : 'Login'; },
+                updateCartCount: () => {
+                    const b = document.getElementById('header-cart-count');
+                    const c = app.state.cart.length;
+                    b.innerText = c; b.classList.toggle('hide', c===0);
+                },
+                openAddressModal: () => document.getElementById('modal-address').classList.remove('hide'),
+                openReviewModal: () => document.getElementById('modal-review').classList.remove('hide'),
+                openEditProfileModal: () => {
+                    if(!app.state.user) return;
+                    document.getElementById('edit-name').value = app.state.profile.name || '';
+                    document.getElementById('edit-phone').value = app.state.profile.phone || '';
+                    document.getElementById('edit-photo').value = app.state.profile.photo || '';
+                    document.getElementById('modal-profile').classList.remove('hide');
+                },
+                openChangePasswordModal: () => document.getElementById('modal-password').classList.remove('hide'),
+                closeModal: id => document.getElementById(id).classList.add('hide'),
+                showInfo: (t, m) => alert(t + '\n' + m)
+            }
+        };
+
+        // Start
+        document.addEventListener('DOMContentLoaded', app.init);
+    </script>
+</body>
+</html>
